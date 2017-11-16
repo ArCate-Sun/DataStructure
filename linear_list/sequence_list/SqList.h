@@ -10,11 +10,10 @@
 /**
  * 顺序表 的定义
  */
-template <class T>
 class SqList : public virtual LinearList {
 
 private:
-    T *data;
+    Element ** data;
     int _size;
     int _capacity;
     int _next_capacity;
@@ -23,31 +22,33 @@ private:
 
 public:
 
-    bool initList() override;
+    SqList();
 
-    bool initList(int size);
+    SqList(int size);
 
-    bool DestroyList() override;
+    SqList(const SqList &list);
 
-    bool ClearList() override;
+    ~SqList() override;
+
+    bool clearList() override;
 
     bool isEmpty() const override;
 
     int length() const override;
 
-    T get(int index) const override;
+    Element * get(int index) const override;
 
-    int locate(T &e, bool *fp_compare(T, T)) const override;
+    int locate(const Element *e) const override;
 
-    T prior(T curr, bool *fp_compare(T, T)) const override;
+    Element * prior(const Element *curr) const override;
 
-    T next(T curr, bool *fp_compare(T, T)) const override;
+    Element * next(const Element *curr) const override;
 
-    bool insert(int index, T e) override;
+    bool insert(int index, const Element *e) override;
 
-    T remove(int index) override;
+    Element * remove(int index) override;
 
-    bool traverse(void *fp_visit(T)) const override;
+    bool traverse() const override;
 
     int capacity() const;
 
@@ -57,5 +58,6 @@ public:
 
 };
 
+void testSqList();
 
 #endif //DATASTRUCTURE_SQLIST_H

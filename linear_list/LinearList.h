@@ -5,25 +5,25 @@
 #ifndef DATASTRUCTURE_LINEARLIST_H
 #define DATASTRUCTURE_LINEARLIST_H
 
+#include "../element/Element.h"
+
 /**
  * 线性表 抽象函数定义
  */
 
-template <class T>
-class LinearList<T> {
+class LinearList {
 public:
-    virtual bool initList() = 0;
-    virtual bool DestroyList() = 0;
-    virtual bool ClearList() = 0;
+    virtual ~LinearList() {}
+    virtual bool clearList() = 0;
     virtual bool isEmpty() const = 0;
     virtual int length() const = 0;
-    virtual T get(int index) const = 0;
-    virtual int locate(T &e, bool *fp_compare(T, T)) const = 0;
-    virtual T prior(T curr, bool *fp_compare(T, T)) const = 0;
-    virtual T next(T curr, bool *fp_compare(T, T)) const = 0;
-    virtual bool insert(int index, T e) = 0;
-    virtual T remove(int index) = 0;
-    virtual bool traverse(void *fp_visit(T)) const = 0;
+    virtual Element * get(int index) const = 0;
+    virtual int locate(const Element *e) const = 0;
+    virtual Element * prior(const Element *curr) const = 0;
+    virtual Element * next(const Element *curr) const = 0;
+    virtual bool insert(int index, const Element *e) = 0;
+    virtual Element * remove(int index) = 0;
+    virtual bool traverse() const = 0;
 };
 
 
