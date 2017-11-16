@@ -16,8 +16,12 @@ SqList::SqList() {
 //        return false;
 //    }
 
-    this->data = (Element **) calloc(static_cast<size_t>(this->_capacity_init), sizeof(Element *));
-    if (!this->data) return;
+    try {
+        this->data = new Element *[this->_capacity_init];
+    } catch (bad_alloc &e) {
+        cerr << "顺序表申请内存失败!" << endl;
+        return;
+    }
 
     this->_capacity = this->_capacity_init;
     this->_size = 0;
@@ -25,14 +29,9 @@ SqList::SqList() {
 
 SqList::SqList(int size) {
 
-//    try {
-//        this->data = new T[size];
-//    } catch (bad_alloc &e) {
-//        return false;
-//    }
-
-    this->data = (Element **) calloc(static_cast<size_t>(size), sizeof(Element *));
-    if (!this->data) {
+    try {
+        this->data = new Element *[size];
+    } catch (bad_alloc &e) {
         cerr << "顺序表申请内存失败!" << endl;
         return;
     }
@@ -43,12 +42,16 @@ SqList::SqList(int size) {
 
 SqList::SqList(const SqList &list) {
 
-    this->data = (Element **) calloc(static_cast<size_t>(list._capacity), sizeof(Element *));
-    if (!this->data) {
+    try {
+        this->data = new Element *[list._capacity];
+    } catch (bad_alloc &e) {
         cerr << "顺序表申请内存失败!" << endl;
         return;
     }
-    memcpy(this->data, list.data, sizeof(Element *) * list._size);
+
+    for (int i = 0; i < list.length(); ++i) {
+        this->data[i] = list.data[i];
+    }
 
     this->_capacity_init = list._capacity_init;
     this->_capacity = list._capacity;
@@ -58,7 +61,7 @@ SqList::SqList(const SqList &list) {
 }
 
 SqList::~SqList() {
-    free(this->data);
+    delete[] this->data;
 }
 
 bool SqList::clearList() {
@@ -83,7 +86,7 @@ int SqList::length() const {
  * @param index 指定位置
  * @return 返回表中指定位置存在的元素, 若表不存在或指定位置不存在元素则返回 nullptr
  */
-Element * SqList::get(int index) const {
+Element *SqList::get(int index) const {
 
     // 若表不存在或指定位置超出表的范围, 则不能获取元素
     if (!this->data || index >= this->_size || index < 0) return nullptr;
@@ -108,11 +111,11 @@ int SqList::locate(const Element *e) const {
     return -1;
 }
 
-Element * SqList::prior(const Element *curr) const {
+Element *SqList::prior(const Element *curr) const {
     return this->get(this->locate(curr) - 1);
 }
 
-Element * SqList::next(const Element *curr) const {
+Element *SqList::next(const Element *curr) const {
     return this->get(this->locate(curr) + 1);
 }
 
@@ -163,7 +166,7 @@ bool SqList::insert(int index, const Element *e) {
     return true;
 }
 
-Element * SqList::remove(int index) {
+Element *SqList::remove(int index) {
 
     // 如果表不存在, 则不能删除元素
     if (!this->data) return nullptr;
@@ -171,7 +174,7 @@ Element * SqList::remove(int index) {
     // 若位置超出表的范围, 则不能产出元素
     if (index < 0 || index >= this->length()) return nullptr;
 
-    Element * e = this->data[index];
+    Element *e = this->data[index];
     for (int i = index; i < this->length() - 1; ++i) {
         this->data[i] = this->data[i + 1];
     }
@@ -234,25 +237,23 @@ bool SqList::increaseCapacity() {
         nextCapacity = this->capacity() + this->_capacity_increase;
     }
 
-    Element ** temp = this->data;
-    this->data = (Element **) realloc(this->data, nextCapacity * sizeof(Element *));
-    // 若重新申请空间失败, 则不能插入元素
-    if (!this->data) {
+    Element **temp = this->data;
+    try {
+        this->data = new Element *[nextCapacity];
+    } catch (bad_alloc &e) {
+        // 若重新申请空间失败, 则不能插入元素
         this->data = temp;
         return false;
+    }
+
+    for (int i = 0; i < this->length(); ++i) {
+        this->data[i] = temp[i];
     }
 
     this->_capacity = nextCapacity;
     this->_next_capacity = 0;
     return true;
 }
-
-
-
-
-
-
-
 
 
 //////////////////////////////////////
