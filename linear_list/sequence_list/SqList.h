@@ -10,10 +10,11 @@
 /**
  * 顺序表 的定义
  */
-class SqList : public virtual LinearList {
+template <class T>
+class SqList : public virtual LinearList<T> {
 
 private:
-    Element ** data;
+    T * data;
     int _size;
     int _capacity;
     int _next_capacity;
@@ -36,19 +37,19 @@ public:
 
     int length() const override;
 
-    Element * get(int index) const override;
+    bool get(int index, T &get_e) const override;
 
-    int locate(const Element *e) const override;
+    int locate(const T &e, bool (*fp_compare)(const T &, const T &)) const override;
 
-    Element * prior(const Element *curr) const override;
+    bool prior(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const override;
 
-    Element * next(const Element *curr) const override;
+    bool next(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const override;
 
-    bool insert(int index, const Element *e) override;
+    bool insert(int index, T &e) override;
 
-    Element * remove(int index) override;
+    bool remove(int index, T &get_e) override;
 
-    bool traverse() const override;
+    bool traverse(void (*fp_visit)(const T &)) const override;
 
     int capacity() const;
 
