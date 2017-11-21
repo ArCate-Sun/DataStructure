@@ -23,6 +23,7 @@ public:
     virtual bool insert(int index, T &e) = 0;
     virtual bool remove(int index, T &get_e) = 0;
     virtual bool traverse(void (*fp_visit)(const T &)) const = 0;
+    virtual T &operator[](int index) = 0;
 };
 
 

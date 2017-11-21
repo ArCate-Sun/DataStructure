@@ -57,6 +57,8 @@ public:
 
     bool increaseCapacity();
 
+    T &operator[](int index);
+
 };
 
 void testSqList();

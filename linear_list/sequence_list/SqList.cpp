@@ -262,6 +262,10 @@ bool SqList<T>::increaseCapacity() {
     return true;
 }
 
+template <class T>
+T &SqList<T>::operator[](int index) {
+    return this->data[index];
+}
 
 //////////////////////////////////////
 // 测试
@@ -300,6 +304,8 @@ void testSqList() {
     list.traverse(visit);
     listInfo(list);
     cout << endl;
+
+    cout << "list[10]: " << list[5] << endl << endl;
 
     cout << "再插入5个元素." << endl;
     for (int i = 10; i < 15; ++i) {
