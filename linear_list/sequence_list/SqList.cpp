@@ -6,6 +6,7 @@
 #include "SqList.h"
 
 using namespace std;
+using namespace DataStructure;
 
 template <class T>
 SqList<T>::SqList() {
@@ -36,7 +37,7 @@ SqList<T>::SqList(int size) {
 }
 
 template <class T>
-SqList<T>::SqList(const SqList &list) {
+SqList<T>::SqList(const SqList<T> &list) {
 
     try {
         this->data = new T[list._capacity];
@@ -73,7 +74,7 @@ bool SqList<T>::clearList() {
 
 template <class T>
 bool SqList<T>::isEmpty() const {
-    return !length();
+    return !this->length();
 }
 
 template <class T>
@@ -103,7 +104,7 @@ int SqList<T>::locate(const T &e, bool (*fp_compare)(const T &, const T &)) cons
     // 若表不存在, 则不能定位元素
     if (!this->data) return -1;
 
-    for (int i = 0; i < length(); ++i) {
+    for (int i = 0; i < this->length(); ++i) {
         if (fp_compare(this->data[i], e)) return i;
     }
     return -1;
@@ -135,7 +136,7 @@ bool SqList<T>::insert(int index, T &e) {
         // index小于表长的情况
 
         // 储存空间已满, 必须扩容, 若扩容失败, 则不能插入元素
-        if (this->length() == this->capacity() && !this->increaseCapacity()) return false;
+        if (this->length() == this->capacity() && !this->ensureCapacity()) return false;
 
         // 插入元素位置后的所有元素后移一位
         for (int i = this->length(); i > index; --i) {
@@ -153,7 +154,7 @@ bool SqList<T>::insert(int index, T &e) {
                 this->_next_capacity = index + 1;
             }
             // 若扩容失败, 则不能插入元素
-            if (!this->increaseCapacity()) return false;
+            if (!this->ensureCapacity()) return false;
         }
 
         // 插入元素
@@ -233,7 +234,7 @@ bool SqList<T>::capacity(int size) {
  * @return 操作十分成功
  */
 template <class T>
-bool SqList<T>::increaseCapacity() {
+bool SqList<T>::ensureCapacity() {
 
     // 如果表不存在, 则不能扩容
     if (!this->data) return false;
@@ -277,8 +278,6 @@ void listInfo(SqList<T> list) {
          << "capacity: " << list.capacity() << endl;
 }
 
-
-
 bool compare(int const &a, int const &b) {
     return a == b;
 }
@@ -305,7 +304,9 @@ void testSqList() {
     listInfo(list);
     cout << endl;
 
-    cout << "list[10]: " << list[5] << endl << endl;
+    cout << "list[5]: " << list[5] << endl;
+    list[5] = 100;
+    cout << "list[5] = 100: " << list[5] << endl << endl;
 
     cout << "再插入5个元素." << endl;
     for (int i = 10; i < 15; ++i) {
