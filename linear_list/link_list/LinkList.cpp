@@ -10,7 +10,11 @@ using namespace DataStructure;
 
 template <class T>
 LinkList<T>::LinkList() {
-    this->__head = new LinkList::Node();
+    try {
+        this->__head = new LinkList::Node();
+    } catch (bad_alloc &e) {
+        e.what();
+    }
     this->__length = 0;
 }
 
@@ -18,10 +22,15 @@ template <class T>
 LinkList<T>::LinkList(const LinkList<T> &list) {
     LinkList::Node *nodeT = this->__head;
     LinkList::Node *nodeR = list.__head;
-    while ((nodeR = nodeR->next)) {
-        nodeT->next = new LinkList::Node();
-        nodeT = nodeT->next;
-        nodeT->data = nodeR->data;
+    try {
+
+        while ((nodeR = nodeR->next)) {
+            nodeT->next = new LinkList::Node();
+            nodeT = nodeT->next;
+            nodeT->data = nodeR->data;
+        }
+    } catch (bad_alloc &e) {
+        e.what();
     }
     this->__length = list.__length;
 }
@@ -50,26 +59,35 @@ template <class T>
 bool LinkList<T>::insert(int index, T &e) {
 
     // 判断index的范围
-    if (index < 0) return false;
+    if (index < 0) throw OutOfIndexError();
 
     LinkList::Node *pos = this->__head;
 
     // 找到待插入位置
-    for (int i = 0; i < index; ++i) {
-        if (!pos->next) {
-            pos->next = new LinkList::Node();
-            ++this->__length;
+    try {
+        for (int i = 0; i < index; ++i) {
+            if (!pos->next) {
+                pos->next = new LinkList::Node();
+                ++this->__length;
+            }
+            pos = pos->next;
         }
-        pos = pos->next;
+    } catch (bad_alloc &e) {
+        e.what();
+        return false;
     }
 
     // 插入数据
     LinkList::Node *temp = pos->next;
-    pos->next = new LinkList::Node();
+    try {
+        pos->next = new LinkList::Node();
+    } catch (bad_alloc &e) {
+        e.what();
+        return false;
+    }
     pos = pos->next;
     pos->data = e;
     pos->next = temp;
-
 
     // 表长加一
     ++this->__length;
@@ -78,12 +96,13 @@ bool LinkList<T>::insert(int index, T &e) {
 }
 
 template <class T>
-bool LinkList<T>::remove(int index, T &get_e) {
+T LinkList<T>::remove(int index) {
 
     // 判断index的范围
-    if (index < 0 || index >= this->__length) return false;
+    if (index < 0 || index >= this->__length) throw OutOfIndexError();
 
     LinkList::Node *pos = this->__head;
+    T get_e;
 
     // 找到待删除的位置
     for (int i = 0; i < index; ++i) {
@@ -98,7 +117,7 @@ bool LinkList<T>::remove(int index, T &get_e) {
 
     --this->__length;
 
-    return true;
+    return get_e;
 }
 
 template <class T>
@@ -122,9 +141,7 @@ template <class T>
 T &LinkList<T>::operator[](int index) {
 
     // 判断index的范围
-    if (index < 0 || index >= this->__length) {
-        throw "错误的下标范围";
-    }
+    if (index < 0 || index >= this->__length) throw OutOfIndexError();
 
     LinkList::Node *pos = this->__head->next;
 
@@ -137,10 +154,10 @@ T &LinkList<T>::operator[](int index) {
 }
 
 template <class T>
-bool LinkList<T>::get(int index, T &e) const {
+T &LinkList<T>::get(int index) const {
 
     // 判断index的范围
-    if (index < 0 || index >= this->__length) return false;
+    if (index < 0 || index >= this->__length) throw OutOfIndexError();
 
     LinkList::Node *pos = this->__head->next;
 
@@ -149,9 +166,7 @@ bool LinkList<T>::get(int index, T &e) const {
         pos = pos->next;
     }
 
-    e = pos->data;
-
-    return true;
+    return pos->data;
 }
 
 template <class T>
@@ -169,13 +184,13 @@ int LinkList<T>::locate(const T &e, bool (*fp_compare)(const T &, const T &)) co
 }
 
 template <class T>
-bool LinkList<T>::prior(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const {
-    return this->get(this->locate(curr, fp_compare) - 1, get_e);
+T &LinkList<T>::prior(const T &curr, bool (*fp_compare)(const T &, const T &)) const {
+    return this->get(this->locate(curr, fp_compare) - 1);
 }
 
 template <class T>
-bool LinkList<T>::next(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const {
-    return this->get(this->locate(curr, fp_compare) + 1, get_e);;
+T &LinkList<T>::next(const T &curr, bool (*fp_compare)(const T &, const T &)) const {
+    return this->get(this->locate(curr, fp_compare) + 1);
 }
 
 template <class T>
@@ -252,25 +267,20 @@ void testLinkList() {
     cout << "定位元素15的位置: " << list.locate(elem, compare_ll) << endl << endl;
 
     cout << "获取第5个位置的元素: ";
-    list.get(5, get_elem);
-    cout << get_elem << endl;
+    cout << list.get(5) << endl;
     cout << "获取第15个位置的元素: ";
-    list.get(15, get_elem);
-    cout << get_elem << endl << endl;
+    cout << list.get(15) << endl << endl;
 
     cout << "获取元素5之前的元素: ";
     elem = 5;
-    list.prior(elem, get_elem, compare_ll);
-    cout << get_elem << endl;
+    cout << list.prior(elem, compare_ll) << endl;
     cout << "获取元素5之后的元素: ";
     elem = 5;
-    list.next(elem, get_elem, compare_ll);
-    cout << get_elem << endl << endl;
+    cout << list.next(elem, compare_ll) << endl << endl;
 
     for (int i = 0; i < 5; ++i) {
         cout << "删除下标为20个元素元素: ";
-        list.remove(20, get_elem);
-        cout << get_elem << endl;
+        cout << list.remove(20) << endl;
     }
     listInfo_ll(list);
     cout << endl;

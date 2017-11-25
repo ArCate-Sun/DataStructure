@@ -12,63 +12,57 @@ template <class T>
 SqList<T>::SqList() {
 
     try {
-        this->data = new T[this->_capacity_init];
+        this->__data = new T[this->__init_capacity];
     } catch (bad_alloc &e) {
-        cerr << "顺序表申请内存失败!" << endl;
-        return;
+        e.what();
     }
 
-    this->_capacity = this->_capacity_init;
-    this->_size = 0;
+    this->__capacity = this->__init_capacity;
+    this->__size = 0;
 }
 
 template <class T>
 SqList<T>::SqList(int size) {
 
     try {
-        this->data = new T[size];
+        this->__data = new T[size];
     } catch (bad_alloc &e) {
-        cerr << "顺序表申请内存失败!" << endl;
-        return;
+        e.what();
     }
 
-    this->_capacity = size;
-    this->_size = 0;
+    this->__capacity = size;
+    this->__size = 0;
 }
 
 template <class T>
 SqList<T>::SqList(const SqList<T> &list) {
 
     try {
-        this->data = new T[list._capacity];
+        this->__data = new T[list.__capacity];
     } catch (bad_alloc &e) {
-        cerr << "顺序表申请内存失败!" << endl;
-        return;
+        e.what();
     }
 
     for (int i = 0; i < list.length(); ++i) {
-        this->data[i] = list.data[i];
+        this->__data[i] = list.__data[i];
     }
 
-    this->_capacity_init = list._capacity_init;
-    this->_capacity = list._capacity;
-    this->_next_capacity = list._next_capacity;
-    this->_capacity_increase = list._capacity_increase;
-    this->_size = list._size;
+    this->__init_capacity = list.__init_capacity;
+    this->__capacity = list.__capacity;
+    this->__next_capacity = list.__next_capacity;
+    this->__capacity_increase = list.__capacity_increase;
+    this->__size = list.__size;
 }
 
 template <class T>
 SqList<T>::~SqList() {
-    delete[] this->data;
+    delete[] this->__data;
 }
 
 template <class T>
 bool SqList<T>::clearList() {
 
-    // 若表不存在, 则不能清空表
-    if (!this->data) return false;
-
-    this->_size = 0;
+    this->__size = 0;
     return true;
 }
 
@@ -79,17 +73,16 @@ bool SqList<T>::isEmpty() const {
 
 template <class T>
 int SqList<T>::length() const {
-    return this->_size;
+    return this->__size;
 }
 
 template <class T>
-bool SqList<T>::get(int index, T &get_e) const {
+T &SqList<T>::get(int index) const {
 
     // 若表不存在或指定位置超出表的范围, 则不能获取元素
-    if (!this->data || index >= this->_size || index < 0) return false;
+    if (index >= this->__size || index < 0) throw OutOfIndexError();
 
-    get_e = this->data[index];
-    return true;
+    return this->__data[index];
 }
 
 /**
@@ -101,23 +94,20 @@ bool SqList<T>::get(int index, T &get_e) const {
 template <class T>
 int SqList<T>::locate(const T &e, bool (*fp_compare)(const T &, const T &)) const {
 
-    // 若表不存在, 则不能定位元素
-    if (!this->data) return -1;
-
     for (int i = 0; i < this->length(); ++i) {
-        if (fp_compare(this->data[i], e)) return i;
+        if (fp_compare(this->__data[i], e)) return i;
     }
     return -1;
 }
 
 template <class T>
-bool SqList<T>::prior(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const {
-    return this->get(this->locate(curr, fp_compare) - 1, get_e);
+T &SqList<T>::prior(const T &curr, bool (*fp_compare)(const T &, const T &)) const {
+    return this->get(this->locate(curr, fp_compare) - 1);
 }
 
 template <class T>
-bool SqList<T>::next(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const {
-    return this->get(this->locate(curr, fp_compare) + 1, get_e);
+T &SqList<T>::next(const T &curr, bool (*fp_compare)(const T &, const T &)) const {
+    return this->get(this->locate(curr, fp_compare) + 1);
 }
 
 /**
@@ -130,7 +120,7 @@ template <class T>
 bool SqList<T>::insert(int index, T &e) {
 
     // 若表不存在或index < 0, 则不能插入元素
-    if (!this->data || index < 0) return false;
+    if (index < 0) throw OutOfIndexError();
 
     if (index < this->length()) {
         // index小于表长的情况
@@ -140,18 +130,18 @@ bool SqList<T>::insert(int index, T &e) {
 
         // 插入元素位置后的所有元素后移一位
         for (int i = this->length(); i > index; --i) {
-            this->data[i] = this->data[i - 1];
+            this->__data[i] = this->__data[i - 1];
         }
         // 插入元素到指定位置
-        this->data[index] = e;
-        ++this->_size;
+        this->__data[index] = e;
+        ++this->__size;
 
     } else {
         // index不小于表容量的情况
-        if (index >= this->_capacity) {
+        if (index >= this->__capacity) {
             // 扩容, 若index不小于下一次扩容的容量, 则重新计算下一次扩容的容量
-            if (index >= this->_next_capacity) {
-                this->_next_capacity = index + 1;
+            if (index >= this->__next_capacity) {
+                this->__next_capacity = index + 1;
             }
             // 若扩容失败, 则不能插入元素
             if (!this->ensureCapacity()) return false;
@@ -159,43 +149,36 @@ bool SqList<T>::insert(int index, T &e) {
 
         // 插入元素
         for (int i = index - 1; i >= this->length(); --i) {
-            this->data[i] = 0;
+            this->__data[i] = 0;
         }
-        this->data[index] = e;
-        this->_size = index + 1;
+        this->__data[index] = e;
+        this->__size = index + 1;
     }
 
     return true;
 }
 
 template <class T>
-bool SqList<T>::remove(int index, T &get_e) {
-
-    // 如果表不存在, 则不能删除元素
-    if (!this->data) return false;
+T SqList<T>::remove(int index) {
 
     // 若位置超出表的范围, 则不能产出元素
-    if (index < 0 || index >= this->length()) return false;
+    if (index < 0 || index >= this->length()) throw OutOfIndexError();
 
-    T e = this->data[index];
+    T e = this->__data[index];
     for (int i = index; i < this->length() - 1; ++i) {
-        this->data[i] = this->data[i + 1];
+        this->__data[i] = this->__data[i + 1];
     }
-    --this->_size;
+    --this->__size;
 
-    get_e = e;
-    return true;
+    return e;
 }
 
 template <class T>
 bool SqList<T>::traverse(void (*fp_visit)(const T &)) const {
 
-    // 如果表不存在, 则不能遍历元素
-    if (!this->data) return false;
-
     cout << "[";
     for (int i = 0; i < this->length(); ++i) {
-        fp_visit(this->data[i]);
+        fp_visit(this->__data[i]);
         cout << ", ";
     }
     cout << "]" << endl;
@@ -205,7 +188,7 @@ bool SqList<T>::traverse(void (*fp_visit)(const T &)) const {
 
 template <class T>
 int SqList<T>::capacity() const {
-    return this->_capacity;
+    return this->__capacity;
 }
 
 /**
@@ -216,13 +199,10 @@ int SqList<T>::capacity() const {
 template <class T>
 bool SqList<T>::capacity(int size) {
 
-    // 如果表不存在, 则不能设置下一次扩容容量
-    if (!this->data) return false;
-
     // 若指定的容量不大于表的当前容量, 则此次操作不生效
     if (size <= this->capacity()) return false;
 
-    this->_next_capacity = size;
+    this->__next_capacity = size;
     return true;
 }
 
@@ -236,63 +216,61 @@ bool SqList<T>::capacity(int size) {
 template <class T>
 bool SqList<T>::ensureCapacity() {
 
-    // 如果表不存在, 则不能扩容
-    if (!this->data) return false;
 
     // 计算扩容后储存空间的大小
-    int nextCapacity = this->_next_capacity;
+    int nextCapacity = this->__next_capacity;
     if (nextCapacity <= this->capacity()) {
-        nextCapacity = this->capacity() + this->_capacity_increase;
+        nextCapacity = this->capacity() + this->__capacity_increase;
     }
 
-    T *temp = this->data;
+    T *temp;
     try {
-        this->data = new T[nextCapacity];
+        temp = new T[nextCapacity];
     } catch (bad_alloc &e) {
-        // 若重新申请空间失败, 则不能插入元素
-        this->data = temp;
+        e.what();
         return false;
     }
 
     for (int i = 0; i < this->length(); ++i) {
-        this->data[i] = temp[i];
+        temp[i] = this->__data[i];
     }
 
-    this->_capacity = nextCapacity;
-    this->_next_capacity = 0;
+    this->__data = temp;
+    this->__capacity = nextCapacity;
+    this->__next_capacity = 0;
     return true;
 }
 
 template <class T>
 T &SqList<T>::operator[](int index) {
-    return this->data[index];
+    return this->__data[index];
 }
 
 //////////////////////////////////////
 // 测试
 //////////////////////////////////////
 template <class T>
-void listInfo(SqList<T> list) {
+void listInfo_sql(SqList<T> list) {
     cout << "empty: " << boolalpha << list.isEmpty() << endl
          << "length: " << list.length() << endl
          << "capacity: " << list.capacity() << endl;
 }
 
-bool compare(int const &a, int const &b) {
+bool compare_sql(int const &a, int const &b) {
     return a == b;
 }
 
-void visit(const int & a) {
+void visit_sql(const int &a) {
     cout << a;
 }
 
 void testSqList() {
 
-    int elem, get_elem;
+    int elem;
     SqList<int> list;
 
     cout << "顺序表初始化." << endl;
-    listInfo(list);
+    listInfo_sql(list);
     cout << endl;
 
     cout << "插入10个元素." << endl;
@@ -300,8 +278,8 @@ void testSqList() {
         list.insert(0, i);
     }
     cout << "遍历: ";
-    list.traverse(visit);
-    listInfo(list);
+    list.traverse(visit_sql);
+    listInfo_sql(list);
     cout << endl;
 
     cout << "list[5]: " << list[5] << endl;
@@ -313,8 +291,8 @@ void testSqList() {
         list.insert(0, i);
     }
     cout << "遍历: ";
-    list.traverse(visit);
-    listInfo(list);
+    list.traverse(visit_sql);
+    listInfo_sql(list);
     cout << endl;
 
     cout << "设置capacity为50." << endl;
@@ -326,41 +304,36 @@ void testSqList() {
         list.insert(0, i);
     }
     cout << "遍历: ";
-    list.traverse(visit);
-    listInfo(list);
+    list.traverse(visit_sql);
+    listInfo_sql(list);
     cout << endl;
 
     elem = 5;
-    cout << "定位元素5的位置: " << list.locate(elem, compare) << endl;
+    cout << "定位元素5的位置: " << list.locate(elem, compare_sql) << endl;
     elem = 15;
-    cout << "定位元素15的位置: " << list.locate(elem, compare) << endl << endl;
+    cout << "定位元素15的位置: " << list.locate(elem, compare_sql) << endl << endl;
 
     cout << "获取第5个位置的元素: ";
-    list.get(5, get_elem);
-    cout << get_elem << endl;
+    cout << list.get(5) << endl;
     cout << "获取第15个位置的元素: ";
-    list.get(15, get_elem);
-    cout << get_elem << endl << endl;
+    cout << list.get(15) << endl << endl;
 
     cout << "获取元素5之前的元素: ";
     elem = 5;
-    list.prior(elem, get_elem, compare);
-    cout << get_elem << endl;
+    cout << list.prior(elem, compare_sql) << endl;
     cout << "获取元素5之后的元素: ";
     elem = 5;
-    list.next(elem, get_elem, compare);
-    cout << get_elem << endl << endl;
+    cout << list.next(elem, compare_sql) << endl << endl;
 
     for (int i = 0; i < 5; ++i) {
         cout << "删除下标为20个元素元素: ";
-        list.remove(20, get_elem);
-        cout << get_elem << endl;
+        cout << list.remove(20) << endl;
     }
-    listInfo(list);
+    listInfo_sql(list);
     cout << endl;
 
     cout << "清除顺序表." << endl;
     list.clearList();
-    listInfo(list);
+    listInfo_sql(list);
 
 }

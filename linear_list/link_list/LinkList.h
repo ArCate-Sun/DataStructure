@@ -6,16 +6,15 @@
 #define DATASTRUCTURE_LINKLIST_H
 
 
-#include "../LinearList.h"
+#include "../../global/core.h"
 
 template <class T>
 class DataStructure::LinkList : public virtual LinearList<T> {
 
 private:
 
-
 protected:
-    static const static struct Node {
+    struct Node {
         T data;
         Node *next;
     };
@@ -32,14 +31,14 @@ public:
     int length() const override;
 
     bool insert(int index, T &e) override;
-    bool remove(int index, T &get_e) override;
+    T remove(int index) override;
     bool clearList() override;
 
     T &operator[](int index) override;
-    bool get(int index, T &e) const override;
+    T &get(int index) const override;
     int locate(const T &e, bool (*fp_compare)(const T &, const T &)) const override;
-    bool prior(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const override;
-    bool next(const T &curr, T &get_e, bool (*fp_compare)(const T &, const T &)) const override;
+    T &prior(const T &curr, bool (*fp_compare)(const T &, const T &)) const override;
+    T &next(const T &curr, bool (*fp_compare)(const T &, const T &)) const override;
     bool traverse(void (*fp_visit)(const T &)) const override;
 
 };

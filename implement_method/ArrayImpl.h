@@ -5,7 +5,7 @@
 #ifndef DATASTRUCTURE_ARRAYIMPL_H
 #define DATASTRUCTURE_ARRAYIMPL_H
 
-#include "../global/config.h"
+#include "../global/core.h"
 
 class DataStructure::ArrayImpl {
 public:
